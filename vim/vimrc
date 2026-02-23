@@ -1,0 +1,174 @@
+" vim/vimrc — managed by env-setup repo
+" Symlinked to ~/.vimrc by install.sh
+" Languages: Python, YAML, Java, SQL
+
+" ─── Plugins (vim-plug) ───────────────────────────────────────────────────────
+call plug#begin('~/.vim/plugged')
+
+" Colorscheme — Nord (muted arctic blues, professional)
+Plug 'arcticicestudio/nord-vim'
+" Plug 'joshdick/onedark.vim'   " alternative: warmer dark theme
+
+" Status line
+Plug 'itchyny/lightline.vim'
+
+" Python
+Plug 'vim-python/python-syntax'
+
+" YAML / Ansible
+Plug 'pearofducks/ansible-vim'
+
+" Java
+Plug 'artur-shaik/vim-javacomplete2'
+
+
+" LSP / Autocomplete (Python, Java, SQL via language servers)
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" File tree
+Plug 'preservim/nerdtree'
+
+" Fuzzy finder
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+" Git integration
+Plug 'tpope/vim-fugitive'
+
+" Auto-close brackets
+Plug 'jiangmiao/auto-pairs'
+
+call plug#end()
+
+" ─── General ─────────────────────────────────────────────────────────────────
+syntax on
+filetype plugin indent on
+
+set encoding=utf-8
+set number
+set relativenumber
+set cursorline
+set showmatch
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+set scrolloff=5
+set laststatus=2          " always show status line
+set noshowmode            " lightline handles mode display
+set hidden                " allow unsaved buffers in background
+set wildmenu
+set backspace=indent,eol,start
+
+" ─── Indentation defaults ────────────────────────────────────────────────────
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set autoindent
+set smartindent
+
+" ─── Colorscheme: Nord ──────────────────────────────────────────────────────
+set termguicolors
+set background=dark
+
+" Nord options — keep it subtle
+let g:nord_cursor_line_number_background = 0   " no bg on current line number
+let g:nord_bold_vertical_split_line       = 0   " no bold split border
+let g:nord_italic                         = 1   " italic comments
+let g:nord_italic_comments                = 1
+let g:nord_underline                      = 0
+
+try
+    colorscheme nord
+catch /^Vim\%((\a\+)\)\=:E185/
+    colorscheme slate                      " clean built-in fallback
+endtry
+
+" Transparent background — inherit terminal color (fixes WSL background box)
+highlight Normal      ctermbg=NONE guibg=NONE
+highlight NonText     ctermbg=NONE guibg=NONE
+highlight EndOfBuffer ctermbg=NONE guibg=NONE
+highlight LineNr      ctermbg=NONE guibg=NONE
+
+" Subtle CursorLine — no background, just the line number highlighted
+highlight CursorLine   ctermbg=NONE guibg=NONE
+highlight CursorLineNr cterm=bold   gui=bold   guifg=#88c0d0
+
+" ─── lightline with Nord ─────────────────────────────────────────────────────
+let g:lightline = { 'colorscheme': 'nord' }
+
+" ─── Python ──────────────────────────────────────────────────────────────────
+let g:python_highlight_all = 1
+
+autocmd FileType python setlocal
+    \ tabstop=4
+    \ shiftwidth=4
+    \ expandtab
+    \ foldmethod=indent
+    \ foldlevel=99
+
+" Format with black on <leader>f
+autocmd FileType python nnoremap <buffer> <leader>f :!black %<CR>
+
+" ─── YAML ────────────────────────────────────────────────────────────────────
+autocmd FileType yaml,yml setlocal
+    \ tabstop=2
+    \ shiftwidth=2
+    \ expandtab
+    \ foldmethod=indent
+    \ foldlevel=99
+
+let g:ansible_unindent_after_newline = 1
+let g:ansible_attribute_highlight = 'ob'
+let g:ansible_name_highlight = 'd'
+
+" ─── Java ────────────────────────────────────────────────────────────────────
+autocmd FileType java setlocal
+    \ tabstop=4
+    \ shiftwidth=4
+    \ expandtab
+
+autocmd FileType java setlocal omnifunc=javacomplete#Complete
+
+" ─── SQL ─────────────────────────────────────────────────────────────────────
+autocmd FileType sql setlocal
+    \ tabstop=2
+    \ shiftwidth=2
+    \ expandtab
+
+" Uppercase SQL keywords on <leader>u
+autocmd FileType sql nnoremap <buffer> <leader>u :%s/\<\(select\|from\|where\|insert\|update\|delete\|join\|on\|and\|or\|not\|in\|is\|null\|order\|by\|group\|having\|limit\|create\|drop\|alter\|table\|index\|view\)\>/\U&/gi<CR>
+
+" ─── NERDTree ────────────────────────────────────────────────────────────────
+nnoremap <leader>n :NERDTreeToggle<CR>
+let NERDTreeShowHidden=1
+
+" ─── fzf ─────────────────────────────────────────────────────────────────────
+nnoremap <leader>p :Files<CR>
+nnoremap <leader>g :Rg<CR>
+
+" ─── coc.nvim (LSP) ──────────────────────────────────────────────────────────
+" Use Tab to trigger completion
+inoremap <silent><expr> <Tab>
+    \ pumvisible() ? "\<C-n>" :
+    \ <SID>check_back_space() ? "\<Tab>" :
+    \ coc#refresh()
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+function! s:check_back_space() abort
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1] =~# '\s'
+endfunction
+
+" Go to definition / references
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gr <Plug>(coc-references)
+nmap <silent> K  :call CocActionAsync('doHover')<CR>
+
+" ─── Splits: open new splits to the right / below ────────────────────────────
+set splitright
+set splitbelow
+
+" ─── Leader key ──────────────────────────────────────────────────────────────
+let mapleader = " "

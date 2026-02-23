@@ -1,0 +1,44 @@
+# vscode/extensions.txt
+# All extensions installed by vscode/install-extensions.sh
+# Add/remove lines to control what gets installed on a new machine.
+
+# ── Theme ─────────────────────────────────────────────────
+zhuangtongfa.material-theme     # One Dark Pro colorscheme
+pkief.material-icon-theme       # Material icons
+
+# ── Claude & AI ───────────────────────────────────────────
+anthropic.claude-code
+github.copilot-chat
+
+# ── Python ────────────────────────────────────────────────
+ms-python.python
+ms-python.vscode-pylance
+ms-python.debugpy
+ms-python.vscode-python-envs
+ms-python.black-formatter
+charliermarsh.ruff
+
+# ── Java ──────────────────────────────────────────────────
+vscjava.vscode-java-pack        # includes: language, debugger, test, maven, project manager
+
+# ── Remote / Containers ───────────────────────────────────
+ms-vscode-remote.remote-containers
+ms-vscode-remote.remote-wsl
+
+# ── Git ───────────────────────────────────────────────────
+eamodio.gitlens
+mhutchie.git-graph
+
+# ── Kubernetes / Docker / AWS ─────────────────────────────
+ms-kubernetes-tools.vscode-kubernetes-tools
+ms-azuretools.vscode-docker
+amazonwebservices.aws-toolkit-vscode
+
+# ── Languages / Formats ───────────────────────────────────
+redhat.vscode-yaml
+tamasfe.even-better-toml
+ms-vscode.makefile-tools
+
+# ── Markdown / Diagrams ───────────────────────────────────
+shd101wyy.markdown-preview-enhanced
+vstirbu.vscode-mermaid-preview

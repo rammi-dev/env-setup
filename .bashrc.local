@@ -1,0 +1,71 @@
+# .bashrc.local — sourced by ~/.bashrc on every new shell
+# Add once to ~/.bashrc:  [ -f ~/env-setup/.bashrc.local ] && source ~/env-setup/.bashrc.local
+
+ENVSETUP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ─── History (improved from ~/.bashrc) ───────────────────────────────────────
+HISTCONTROL=ignoreboth          # no duplicates, no space-prefixed
+shopt -s histappend             # append, never overwrite
+HISTSIZE=10000                  # larger than default 1000
+HISTFILESIZE=20000
+HISTTIMEFORMAT="%F %T "        # timestamp each entry
+shopt -s checkwinsize           # update LINES/COLUMNS after each command
+
+# ─── PATH ────────────────────────────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$ENVSETUP_DIR/scripts:$PATH"
+
+# gcloud SDK
+[ -d "$HOME/google-cloud-sdk/bin" ] && export PATH="$HOME/google-cloud-sdk/bin:$PATH"
+
+# WSL: VirtualBox
+[ -d "/mnt/c/Program Files/Oracle/VirtualBox" ] && \
+    export PATH="$PATH:/mnt/c/Program Files/Oracle/VirtualBox"
+
+# ─── Cargo (Rust) ────────────────────────────────────────────────────────────
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+# ─── Python: uv only (replaces the interactive uv/pyenv prompt) ──────────────
+# Using uv — no pyenv interference
+unset PYENV_VERSION PYENV_ROOT 2>/dev/null || true
+# Activate uv shell env if present
+[ -f "$HOME/.local/bin/env" ] && source "$HOME/.local/bin/env"
+
+# ─── Aliases ─────────────────────────────────────────────────────────────────
+[ -f "$ENVSETUP_DIR/aliases/general.sh" ]    && source "$ENVSETUP_DIR/aliases/general.sh"
+[ -f "$ENVSETUP_DIR/aliases/kubernetes.sh" ] && source "$ENVSETUP_DIR/aliases/kubernetes.sh"
+[ -f "$ENVSETUP_DIR/aliases/aws.sh" ]        && source "$ENVSETUP_DIR/aliases/aws.sh"
+[ -f "$ENVSETUP_DIR/aliases/gcloud.sh" ]     && source "$ENVSETUP_DIR/aliases/gcloud.sh"
+
+# Pass-through to legacy ~/.bash_aliases if user still has it
+[ -f "$HOME/.bash_aliases" ] && source "$HOME/.bash_aliases"
+
+# ─── Functions ───────────────────────────────────────────────────────────────
+[ -f "$ENVSETUP_DIR/functions/kubernetes.sh" ] && source "$ENVSETUP_DIR/functions/kubernetes.sh"
+
+# Short alias for listcrd
+alias lcrd='listcrd'
+alias lcrd-a='listcrd -A'
+
+# ─── System bash-completion ──────────────────────────────────────────────────
+if ! shopt -oq posix; then
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+        source /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+        source /etc/bash_completion
+    fi
+fi
+
+# ─── kubectl completion + k alias completion ─────────────────────────────────
+if command -v kubectl &>/dev/null; then
+    source <(kubectl completion bash 2>/dev/null)
+    alias k='kubectl'
+    complete -o default -F __start_kubectl k
+fi
+
+# ─── kubens + kubectx completions ────────────────────────────────────────────
+for cmd in kubens kubectx; do
+    command -v "$cmd" &>/dev/null && source <("$cmd" completion bash 2>/dev/null) 2>/dev/null || true
+done
+
+# ─── AWS CLI completion ───────────────────────────────────────────────────────
+command -v aws_completer &>/dev/null && complete -C aws_completer aws

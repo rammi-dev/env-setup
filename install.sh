@@ -246,17 +246,28 @@ else
     info "On WSL: open VS Code from Windows once; it registers 'code' automatically."
 fi
 
+# ─── Shell config deploy ─────────────────────────────────────────────────────
+section "Shell config → ~/.config/env-setup/"
+DEPLOY_DIR="$HOME/.config/env-setup"
+mkdir -p "$DEPLOY_DIR/aliases" "$DEPLOY_DIR/functions"
+cp "$REPO_DIR/.bashrc.local"       "$DEPLOY_DIR/.bashrc.local"
+cp "$REPO_DIR"/aliases/*.sh        "$DEPLOY_DIR/aliases/"
+cp "$REPO_DIR"/functions/*.sh      "$DEPLOY_DIR/functions/"
+info "Shell configs deployed to $DEPLOY_DIR"
+
 # ─── ~/.bashrc hook ──────────────────────────────────────────────────────────
 section "~/.bashrc hook"
-HOOK="[ -f $REPO_DIR/.bashrc.local ] && source $REPO_DIR/.bashrc.local"
-if ! grep -qF '.bashrc.local' "$HOME/.bashrc" 2>/dev/null; then
-    echo "" >> "$HOME/.bashrc"
-    echo "# env-setup" >> "$HOME/.bashrc"
-    echo "$HOOK" >> "$HOME/.bashrc"
-    info "Added source hook to ~/.bashrc"
-else
-    skip "~/.bashrc hook (already present)"
+HOOK='[ -f ~/.config/env-setup/.bashrc.local ] && source ~/.config/env-setup/.bashrc.local'
+if grep -qF '.bashrc.local' "$HOME/.bashrc" 2>/dev/null; then
+    # Replace any existing hook (may have a hardcoded repo path) with the fixed path
+    sed -i '/\.bashrc\.local/d' "$HOME/.bashrc"
 fi
+# Remove stale "# env-setup" comment left by previous installs if the hook was just deleted
+sed -i '/^# env-setup$/{ N; /^\n$/d; }' "$HOME/.bashrc"
+echo "" >> "$HOME/.bashrc"
+echo "# env-setup" >> "$HOME/.bashrc"
+echo "$HOOK" >> "$HOME/.bashrc"
+info "~/.bashrc hook set to source ~/.config/env-setup/.bashrc.local"
 
 # ─── Done ────────────────────────────────────────────────────────────────────
 echo

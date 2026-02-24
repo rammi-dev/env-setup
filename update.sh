@@ -170,6 +170,38 @@ else
     info "listcrd not installed — run install.sh"
 fi
 
+# ─── Shell config ───────────────────────────────────────────────────────────
+echo "── shell config ─────────────────────────────────────"
+DEPLOY_DIR="$HOME/.config/env-setup"
+if [[ -d "$DEPLOY_DIR" ]]; then
+    _shell_changed=false
+    for src in "$REPO_DIR/.bashrc.local" "$REPO_DIR"/aliases/*.sh "$REPO_DIR"/functions/*.sh; do
+        rel="${src#"$REPO_DIR"/}"
+        dest="$DEPLOY_DIR/$rel"
+        if [[ -f "$dest" ]] && ! diff -q "$src" "$dest" &>/dev/null; then
+            _shell_changed=true
+            break
+        elif [[ ! -f "$dest" ]]; then
+            _shell_changed=true
+            break
+        fi
+    done
+    if $_shell_changed; then
+        outdated "shell config (repo version differs from deployed)"
+        if _confirm "Re-deploy shell configs to $DEPLOY_DIR?"; then
+            mkdir -p "$DEPLOY_DIR/aliases" "$DEPLOY_DIR/functions"
+            cp "$REPO_DIR/.bashrc.local"   "$DEPLOY_DIR/.bashrc.local"
+            cp "$REPO_DIR"/aliases/*.sh    "$DEPLOY_DIR/aliases/"
+            cp "$REPO_DIR"/functions/*.sh  "$DEPLOY_DIR/functions/"
+            info "shell configs re-deployed"
+        fi
+    else
+        ok "shell config is up to date"
+    fi
+else
+    info "shell config not deployed — run install.sh"
+fi
+
 # ─── AWS CLI ────────────────────────────────────────────────────────────────
 echo "── AWS CLI ──────────────────────────────────────────"
 if command -v aws &>/dev/null; then

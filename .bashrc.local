@@ -16,7 +16,7 @@ shopt -s checkwinsize           # update LINES/COLUMNS after each command
 export COLORTERM=truecolor
 
 # ─── PATH ────────────────────────────────────────────────────────────────────
-export PATH="$HOME/.local/bin:$ENVSETUP_DIR/scripts:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 # gcloud SDK
 [ -d "$HOME/google-cloud-sdk/bin" ] && export PATH="$HOME/google-cloud-sdk/bin:$PATH"

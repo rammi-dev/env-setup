@@ -11,6 +11,10 @@ HISTFILESIZE=20000
 HISTTIMEFORMAT="%F %T "        # timestamp each entry
 shopt -s checkwinsize           # update LINES/COLUMNS after each command
 
+# ─── True-color support for vim / terminal apps ─────────────────────────────
+# WSL and most modern terminals support 24-bit color but don't always advertise it
+export COLORTERM=truecolor
+
 # ─── PATH ────────────────────────────────────────────────────────────────────
 export PATH="$HOME/.local/bin:$ENVSETUP_DIR/scripts:$PATH"
 
@@ -62,10 +66,7 @@ if command -v kubectl &>/dev/null; then
     complete -o default -F __start_kubectl k
 fi
 
-# ─── kubens + kubectx completions ────────────────────────────────────────────
-for cmd in kubens kubectx; do
-    command -v "$cmd" &>/dev/null && source <("$cmd" completion bash 2>/dev/null) 2>/dev/null || true
-done
+# kubens/kubectx (Go binaries) don't support shell completions — not needed
 
 # ─── AWS CLI completion ───────────────────────────────────────────────────────
 command -v aws_completer &>/dev/null && complete -C aws_completer aws

@@ -242,8 +242,8 @@ fi
 
 # ─── ~/.bashrc hook ──────────────────────────────────────────────────────────
 section "~/.bashrc hook"
-HOOK='[ -f ~/env-setup/.bashrc.local ] && source ~/env-setup/.bashrc.local'
-if ! grep -qF 'env-setup/.bashrc.local' "$HOME/.bashrc" 2>/dev/null; then
+HOOK="[ -f $REPO_DIR/.bashrc.local ] && source $REPO_DIR/.bashrc.local"
+if ! grep -qF '.bashrc.local' "$HOME/.bashrc" 2>/dev/null; then
     echo "" >> "$HOME/.bashrc"
     echo "# env-setup" >> "$HOME/.bashrc"
     echo "$HOOK" >> "$HOME/.bashrc"

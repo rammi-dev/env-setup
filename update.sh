@@ -164,18 +164,60 @@ else
     info "listcrd not installed — run install.sh"
 fi
 
+# ─── AWS CLI ────────────────────────────────────────────────────────────────
+echo "── AWS CLI ──────────────────────────────────────────"
+if command -v aws &>/dev/null; then
+    INSTALLED="$(aws --version 2>&1 | grep -Eo 'aws-cli/[0-9]+\.[0-9]+\.[0-9]+' | cut -d/ -f2)"
+    # AWS CLI v2 latest version from GitHub
+    LATEST="$(_github_latest aws/aws-cli)"
+    if [[ "$INSTALLED" == "$LATEST" ]]; then
+        ok "aws-cli $INSTALLED is up to date"
+    else
+        outdated "aws-cli $INSTALLED → ${LATEST:-unknown}"
+        if _confirm "Update AWS CLI v2?"; then
+            TMP=$(mktemp -d)
+            curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "$TMP/awscliv2.zip"
+            unzip -q "$TMP/awscliv2.zip" -d "$TMP"
+            "$TMP/aws/install" --install-dir "$HOME/.local/aws-cli" --bin-dir "$LOCAL_BIN" --update
+            rm -rf "$TMP"
+            info "aws-cli updated to $(aws --version 2>&1 | grep -Eo 'aws-cli/[0-9]+\.[0-9]+\.[0-9]+' | cut -d/ -f2)"
+        fi
+    fi
+else
+    info "aws-cli not installed — run install.sh"
+fi
+
+# ─── gcloud CLI ─────────────────────────────────────────────────────────────
 echo "── gcloud ───────────────────────────────────────────"
 if command -v gcloud &>/dev/null; then
-    INSTALLED="$(gcloud --version 2>/dev/null | head -1)"
-    outdated "gcloud uses its own updater"
+    INSTALLED="$(gcloud version 2>/dev/null | head -1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+    ok "gcloud $INSTALLED installed (uses its own updater)"
     if _confirm "Update gcloud? (uses: gcloud components update)"; then
         gcloud components update --quiet
-        info "gcloud updated: $(gcloud --version | head -1)"
-    else
-        ok "gcloud $INSTALLED (skipped)"
+        info "gcloud updated: $(gcloud version 2>/dev/null | head -1)"
     fi
 else
     info "gcloud not installed — run install.sh"
+fi
+
+# ─── Gemini CLI ─────────────────────────────────────────────────────────────
+echo "── Gemini CLI ───────────────────────────────────────"
+if command -v gemini &>/dev/null; then
+    INSTALLED="$(gemini --version 2>/dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+    LATEST="$(npm view @google/gemini-cli version 2>/dev/null || echo "")"
+    if [[ -z "$INSTALLED" ]]; then
+        ok "gemini installed (version unknown)"
+    elif [[ "$INSTALLED" == "$LATEST" ]]; then
+        ok "gemini $INSTALLED is up to date"
+    else
+        outdated "gemini $INSTALLED → ${LATEST:-unknown}"
+        if _confirm "Update Gemini CLI?"; then
+            npm install -g @google/gemini-cli --prefix "$HOME/.local" 2>&1 | grep -v "^npm warn EBADENGINE" || true
+            info "gemini updated to $(gemini --version 2>/dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+        fi
+    fi
+else
+    info "gemini not installed — run install.sh"
 fi
 
 # ─── VS Code extensions ───────────────────────────────────────────────────────

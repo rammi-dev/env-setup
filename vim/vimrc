@@ -69,7 +69,12 @@ set autoindent
 set smartindent
 
 " ─── Colorscheme: Nord ──────────────────────────────────────────────────────
-set termguicolors
+" Enable true-color (24-bit) in terminals that support it
+if has('termguicolors')
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    set termguicolors
+endif
 set background=dark
 
 " Nord options — keep it subtle
@@ -128,8 +133,24 @@ autocmd FileType java setlocal
     \ tabstop=4
     \ shiftwidth=4
     \ expandtab
+    \ foldmethod=syntax
+    \ foldlevel=99
 
 autocmd FileType java setlocal omnifunc=javacomplete#Complete
+
+" ─── Shell (bash/sh/zsh) ────────────────────────────────────────────────────
+let g:sh_fold_enabled = 7          " fold functions(1) + if/do/for(2) + heredocs(4)
+autocmd FileType sh,bash,zsh setlocal
+    \ foldmethod=syntax
+    \ foldlevel=99
+
+" ─── JSON ───────────────────────────────────────────────────────────────────
+autocmd FileType json setlocal
+    \ tabstop=2
+    \ shiftwidth=2
+    \ expandtab
+    \ foldmethod=syntax
+    \ foldlevel=99
 
 " ─── SQL ─────────────────────────────────────────────────────────────────────
 autocmd FileType sql setlocal

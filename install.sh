@@ -45,11 +45,17 @@ section "kubectx + kubens v${KUBECTX_VERSION}"
 if ! command -v kubectx &>/dev/null; then
     info "Installing kubectx + kubens..."
     TMP=$(mktemp -d)
-    TARBALL="kubectx_v${KUBECTX_VERSION}_$(_os)_$(_arch).tar.gz"
+    ARCH="$(uname -m)"
+    CTX_TARBALL="kubectx_v${KUBECTX_VERSION}_$(_os)_${ARCH}.tar.gz"
+    NS_TARBALL="kubens_v${KUBECTX_VERSION}_$(_os)_${ARCH}.tar.gz"
     curl -fsSL \
-        "https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/${TARBALL}" \
-        -o "$TMP/$TARBALL"
-    tar -xzf "$TMP/$TARBALL" -C "$TMP"
+        "https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/${CTX_TARBALL}" \
+        -o "$TMP/$CTX_TARBALL"
+    curl -fsSL \
+        "https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/${NS_TARBALL}" \
+        -o "$TMP/$NS_TARBALL"
+    tar -xzf "$TMP/$CTX_TARBALL" -C "$TMP"
+    tar -xzf "$TMP/$NS_TARBALL" -C "$TMP"
     install -m 0755 "$TMP/kubectx" "$LOCAL_BIN/kubectx"
     install -m 0755 "$TMP/kubens"  "$LOCAL_BIN/kubens"
     rm -rf "$TMP"

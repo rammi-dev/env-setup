@@ -75,11 +75,17 @@ if command -v kubectx &>/dev/null; then
         outdated "kubectx $INSTALLED → $LATEST"
         if _confirm "Update kubectx + kubens?"; then
             TMP=$(mktemp -d)
-            TARBALL="kubectx_v${LATEST}_$(_os)_$(_arch).tar.gz"
+            ARCH="$(uname -m)"
+            CTX_TARBALL="kubectx_v${LATEST}_$(_os)_${ARCH}.tar.gz"
+            NS_TARBALL="kubens_v${LATEST}_$(_os)_${ARCH}.tar.gz"
             curl -fsSL \
-                "https://github.com/ahmetb/kubectx/releases/download/v${LATEST}/${TARBALL}" \
-                -o "$TMP/$TARBALL"
-            tar -xzf "$TMP/$TARBALL" -C "$TMP"
+                "https://github.com/ahmetb/kubectx/releases/download/v${LATEST}/${CTX_TARBALL}" \
+                -o "$TMP/$CTX_TARBALL"
+            curl -fsSL \
+                "https://github.com/ahmetb/kubectx/releases/download/v${LATEST}/${NS_TARBALL}" \
+                -o "$TMP/$NS_TARBALL"
+            tar -xzf "$TMP/$CTX_TARBALL" -C "$TMP"
+            tar -xzf "$TMP/$NS_TARBALL" -C "$TMP"
             install -m 0755 "$TMP/kubectx" "$LOCAL_BIN/kubectx"
             install -m 0755 "$TMP/kubens"  "$LOCAL_BIN/kubens"
             rm -rf "$TMP"
@@ -168,8 +174,9 @@ fi
 echo "── AWS CLI ──────────────────────────────────────────"
 if command -v aws &>/dev/null; then
     INSTALLED="$(aws --version 2>&1 | grep -Eo 'aws-cli/[0-9]+\.[0-9]+\.[0-9]+' | cut -d/ -f2)"
-    # AWS CLI v2 latest version from GitHub
-    LATEST="$(_github_latest aws/aws-cli)"
+    # AWS CLI v2 doesn't use GitHub Releases; query latest tag instead
+    LATEST="$(curl -fsSL "https://api.github.com/repos/aws/aws-cli/tags?per_page=1" \
+        | grep '"name"' | sed -E 's/.*"([^"]+)".*/\1/' | head -1)"
     if [[ "$INSTALLED" == "$LATEST" ]]; then
         ok "aws-cli $INSTALLED is up to date"
     else
